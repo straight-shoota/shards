@@ -53,13 +53,15 @@ module Shards
       def add(dependency : Dependency)
         pkg = @packages[dependency.name] ||= Pkg.new(dependency)
         resolver = pkg.resolver
+        other_shard_names = [] of String
 
         versions_for(dependency, resolver).each do |version|
           next if pkg.versions.has_key?(version)
 
           if spec = resolver.spec?(version)
             unless dependency.name == spec.name
-              raise Error.new("Error shard name (#{spec.name}) doesn't match dependency name (#{dependency.name})")
+              other_shard_names << spec.name unless other_shard_names.includes?(spec.name)
+              next
             end
 
             pkg.versions[version] = spec
@@ -67,6 +69,10 @@ module Shards
           else
             # skip (e.g. missing shard.yml)
           end
+        end
+
+        if pkg.versions.empty? && !other_shard_names.empty?
+          raise Error.new("Error shard name (#{other_shard_names.join(", ")}) doesn't match dependency name (#{dependency.name})")
         end
       end
 
