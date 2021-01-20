@@ -25,6 +25,16 @@ module Shards
 
         ignore_lock_requirement = false
 
+        spec = begin
+          dep.resolver.spec(lock.version)
+        rescue ex : Shards::Error
+          if dep.resolver != lock.resolver
+            raise Shards::Error.new("Locked version #{lock.version} for #{dep.name} was not found in #{dep.resolver} (locked source is #{lock.resolver}).\n\nPlease run `shards update`", cause: ex)
+          else
+            raise ex
+          end
+        end
+
         # Use the resolver from dependencies (not lock) if available.
         # This is to allow changing source without bumping the version when possible.
         if dep.resolver != lock.resolver
@@ -36,8 +46,6 @@ module Shards
         unless ignore_lock_requirement
           base.add_vertex(lock.name, Dependency.new(lock.name, dep.resolver, lock.version), true)
         end
-
-        spec = dep.resolver.spec(lock.version)
 
         add_lock base, lock_index, apply_overrides(spec.dependencies)
       end
