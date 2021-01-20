@@ -22,13 +22,21 @@ module Shards
     private def add_lock(base, lock_index, dep : Dependency)
       if lock = lock_index.delete(dep.name)
         check_single_resolver_by_name dep.resolver
-        base.add_vertex(lock.name, Dependency.new(lock.name, dep.resolver, lock.version), true)
+
+        ignore_lock_requirement = false
 
         # Use the resolver from dependencies (not lock) if available.
         # This is to allow changing source without bumping the version when possible.
         if dep.resolver != lock.resolver
           Log.warn { "Ignoring source of \"#{dep.name}\" on shard.lock" }
+
+          ignore_lock_requirement = !dep.resolver.versions_for(dep.requirement).includes?(lock.version)
         end
+
+        unless ignore_lock_requirement
+          base.add_vertex(lock.name, Dependency.new(lock.name, dep.resolver, lock.version), true)
+        end
+
         spec = dep.resolver.spec(lock.version)
 
         add_lock base, lock_index, apply_overrides(spec.dependencies)

@@ -309,6 +309,35 @@ describe "install" do
     end
   end
 
+  it "keeps installed version if possible when dependency source changed (pinned branch, common commit locked)" do
+    metadata = {dependencies: {awesome: {git: git_url(:forked_awesome), branch: "master"}}}
+    lock = {awesome: "0.1.0+git.commit.#{git_commits(:awesome).last}"}
+
+    with_shard(metadata, lock) do
+      assert_locked "awesome", "0.1.0", source: {git: git_url(:awesome)}, git: git_commits(:awesome).last
+
+      output = run "shards install --no-color"
+
+      assert_locked "awesome", source: {git: git_url(:forked_awesome)}, git: git_commits(:awesome).first
+      assert_installed "awesome", source: {git: git_url(:forked_awesome)}, git: git_commits(:awesome).first
+
+      output.should contain("Ignoring source of \"awesome\" on shard.lock")
+    end
+  end
+
+  it "keeps installed version if possible when dependency source changed (pinned branch, new commit locked)" do
+    metadata = {dependencies: {awesome: {git: git_url(:forked_awesome), branch: "master"}}}
+    lock = {awesome: "0.1.0+git.commit.#{git_commits(:awesome).first}"}
+
+    with_shard(metadata, lock) do
+      assert_locked "awesome", "0.1.0", source: {git: git_url(:awesome)}, git: git_commits(:awesome).first
+
+      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
+      ex.stdout.should contain("Maybe a commit, branch or file doesn't exist?")
+      ex.stderr.should be_empty
+    end
+  end
+
   it "keeps nested dependencies locked when main dependency source changed" do
     metadata = {dependencies: {awesome: {git: git_url(:forked_awesome)}}}
     lock = {awesome: "0.1.0", d: "0.1.0"}
