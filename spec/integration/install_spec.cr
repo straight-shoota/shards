@@ -398,7 +398,7 @@ describe "install" do
     end
   end
 
-  ["frozen", "production"].each do |flag|
+  ["frozen", "deployment", "production"].each do |flag|
     describe "with --#{flag}" do
       it "fails if shard.lock and shard.yml has different sources" do
         # The sources will not match, so the .lock is not valid regarding the specs
@@ -572,25 +572,27 @@ describe "install" do
     end
   end
 
-  describe "with --production" do
-    it "doesn't install development dependencies" do
-      metadata = {
-        dependencies:             {web: "*", orm: "*"},
-        development_dependencies: {mock: "*"},
-      }
-      # --production requires a lock file because it implies --frozen
-      lock = {web: "1.0.0", orm: "0.3.0"}
+  ["deployment", "production"].each do |flag|
+    describe "with --#{flag}" do
+      it "doesn't install development dependencies" do
+        metadata = {
+          dependencies:             {web: "*", orm: "*"},
+          development_dependencies: {mock: "*"},
+        }
+        # --deployment requires a lock file because it implies --frozen
+        lock = {web: "1.0.0", orm: "0.3.0"}
 
-      with_shard(metadata, lock) do
-        run "shards install --production"
+        with_shard(metadata, lock) do
+          run "shards install --production"
 
-        # it installed dependencies (recursively)
-        assert_installed "web"
-        assert_installed "orm"
+          # it installed dependencies (recursively)
+          assert_installed "web"
+          assert_installed "orm"
 
-        # it didn't install development dependencies
-        refute_installed "mock"
-        refute_installed "minitest"
+          # it didn't install development dependencies
+          refute_installed "mock"
+          refute_installed "minitest"
+        end
       end
     end
   end

@@ -92,7 +92,7 @@ Dependencies are not satisfied.
 Initializes a default \fIshard.yml\fP in the current folder.
 .RE
 .sp
-\fBinstall\fP [\-\-frozen] [\-\-without\-development] [\-\-production]
+\fBinstall\fP [\-\-frozen] [\-\-without\-development] [\-\-deployment]
 .RS 4
 Resolves and installs dependencies into the \fIlib\fP folder. If not already
 present, generates a \fIshard.lock\fP file from resolved dependencies, locking
@@ -113,7 +113,7 @@ Strictly installs locked versions from \fIshard.lock\fP. Fails if \fIshard.lock\
 Does not install development dependencies.
 .RE
 .sp
-\-\-production
+\-\-deployment
 .RS 4
 same as \fI\-\-frozen\fP and \fI\-\-without\-development\fP
 .RE

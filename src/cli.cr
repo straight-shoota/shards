@@ -36,7 +36,12 @@ module Shards
       opts.on("--without-development", "Does not install development dependencies.") do
         self.with_development = false
       end
-      opts.on("--production", "same as `--frozen --without-development`") do
+      opts.on("--deployment", "same as `--frozen --without-development`") do
+        self.frozen = true
+        self.with_development = false
+      end
+      opts.on("--production", "Deprecated, use `shards install --deployment` instead.") do
+        Log.warn { "The `--production` flag is deprecated and will be removed in future versions, please use `--deployment` instead." }
         self.frozen = true
         self.with_development = false
       end
