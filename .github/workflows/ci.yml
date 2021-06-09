@@ -48,7 +48,14 @@ jobs:
     steps:
       - name: Download source
         uses: actions/checkout@v2
+      - name: Touch doc files with git timestamps because asciidoctor image has no git
+        run: >
+          for file in docs/*.adoc; do touch -m -d "$(git log -1 --format='%aI' -- $file)" $file; echo "$file: $(git log -1 --format='%aI' -- $file)"; done
+      - name: Debug
+        run: ls -l docs
       - name: Build manpages
         uses: Analog-inc/asciidoctor-action@master
         with:
-          shellcommand: "make manpages"
+          shellcommand: "make clean_docs manpages"
+      - name: Check manpages are up to date
+        run: "git diff --color --exit-code"
