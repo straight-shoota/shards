@@ -233,7 +233,7 @@ module Shards
 
       FileUtils.rm_r(install_path) if File.exists?(install_path)
       Dir.mkdir_p(install_path)
-      run "hg clone#{Shards::Log.level.debug? ? nil : " --quiet"} -u #{Process.quote(ref.to_hg_ref)} -- #{Process.quote(local_path)} #{Process.quote(install_path)}"
+      run "hg clone #{Shards::Log.level.debug? ? "--verbose" : "--quiet"} -u #{Process.quote(ref.to_hg_ref)} -- #{Process.quote(local_path)} #{Process.quote(install_path)}"
     end
 
     def commit_sha1_at(ref : HgRef)
@@ -342,7 +342,7 @@ module Shards
         #
         # An alternative would be to use the `@` bookmark, but only as long
         # as nothing new is committed.
-        run_in_current_folder "hg clone#{Shards::Log.level.debug? ? nil : " --quiet"} -- #{Process.quote(source)} #{Process.quote(path)}"
+        run_in_current_folder "hg clone #{Shards::Log.level.debug? ? "--verbose" : "--quiet"} -- #{Process.quote(source)} #{Process.quote(path)}"
       end
     end
 
