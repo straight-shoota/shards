@@ -317,13 +317,13 @@ module Shards
       # This configuration can be overridden by defining the environment
       # variable `GIT_ASKPASS`.
       git_retry(err: "Failed to clone #{git_url}") do
-        run_in_folder "git clone -c core.askPass=true -c init.templateDir= --mirror --quiet -- #{Process.quote(git_url)} #{Process.quote(local_path)}"
+        run_in_folder "git clone -c core.askPass=true -c init.templateDir= --mirror#{Shards::Log.level.debug? ? nil : " --quiet"} -- #{Process.quote(git_url)} #{Process.quote(local_path)}"
       end
     end
 
     private def fetch_repository
       git_retry(err: "Failed to update #{git_url}") do
-        run "git fetch --all --quiet"
+        run "git fetch --all#{Shards::Log.level.debug? ? nil : " --quiet"}"
       end
     end
 
