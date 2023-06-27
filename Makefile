@@ -14,7 +14,11 @@ SOURCES = $(SHARDS_SOURCES) $(MOLINILLO_SOURCES)
 TEMPLATES = src/templates/*.ecr
 
 SHARDS_CONFIG_BUILD_COMMIT := $(shell git rev-parse --short HEAD 2> /dev/null)
-SHARDS_VERSION := $(shell cat VERSION)
+ifeq ($(OS),Windows_NT)
+	SHARDS_VERSION := $(shell type VERSION)
+else
+	SHARDS_VERSION := $(shell cat VERSION)
+endif
 SOURCE_DATE_EPOCH := $(shell (git show -s --format=%ct HEAD || stat -c "%Y" Makefile || stat -f "%m" Makefile) 2> /dev/null)
 EXPORTS := SHARDS_CONFIG_BUILD_COMMIT="$(SHARDS_CONFIG_BUILD_COMMIT)" SOURCE_DATE_EPOCH="$(SOURCE_DATE_EPOCH)"
 DESTDIR ?=
