@@ -112,8 +112,19 @@ module Shards::Specs
       end
     end
   end
+
+  def self.application_path(*path)
+    File.join(application_path, *path)
+  end
 end
 
-def application_path
-  Shards::Specs.application_path
+def application_path(*path)
+  Shards::Specs.application_path(*path)
+end
+
+def assert_application_path_exists(*path, file = __FILE__, line = __LINE__)
+  full_path = Path[*path].expand(application_path)
+  unless File.exists?(full_path)
+    fail "Expected #{full_path} to exist", file: file, line: line
+  end
 end
