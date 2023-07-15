@@ -839,7 +839,7 @@ describe "install" do
 
     assert_application_path_exists foobar
     assert_application_path_exists baz
-    assert_application_path_exists foo
+    refute_application_path_exists foo
     assert_application_path_exists crystal
 
     `#{Process.quote(foobar)}`.should eq("OK")
@@ -865,7 +865,7 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color --skip-executables") }
 
-    refute_application_path_exists, "bin"
+    refute_application_path_exists "bin"
   end
 
   it "installs executables at refs" do
@@ -878,7 +878,7 @@ describe "install" do
 
     assert_application_path_exists "bin", Shards::Helpers.exe("foobar")
     assert_application_path_exists "bin", Shards::Helpers.exe("baz")
-    assert_application_path_exists "bin", Shards::Helpers.exe("foo")
+    refute_application_path_exists "bin", Shards::Helpers.exe("foo")
   end
 
   it "shows conflict message" do

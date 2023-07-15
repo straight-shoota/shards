@@ -286,3 +286,11 @@ rescue ex : FailedCommand
   puts ex.stdout
   puts ex.stderr
 end
+
+def assert_application_path_exists(*path, message = nil, file = __FILE__, line = __LINE__)
+  assert File.exists?(Path[*path].expand(application_path)), message || "Expected #{Path[path]} to exist", file: file, line: line
+end
+
+def refute_application_path_exists(*path, message = nil, file = __FILE__, line = __LINE__)
+  refute File.exists?(Path[*path].expand(application_path)), message || "Expected #{Path[path]} not to exist", file: file, line: line
+end
