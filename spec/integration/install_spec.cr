@@ -866,13 +866,7 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color --skip-executables") }
 
-    foobar = File.join(application_path, "bin", Shards::Helpers.exe("foobar"))
-    baz = File.join(application_path, "bin", Shards::Helpers.exe("baz"))
-    foo = File.join(application_path, "bin", Shards::Helpers.exe("foo"))
-
-    File.exists?(foobar).should be_false
-    File.exists?(baz).should be_false
-    File.exists?(foo).should be_false
+    File.exists?(Path[application_path, "bin"]).should be_false
   end
 
   it "installs executables at refs" do
