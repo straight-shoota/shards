@@ -131,6 +131,13 @@ module Shards
       each_executable_path(name) do |path|
         return path if File.exists?(install_path.join(path))
       end
+
+      if target = spec.targets.find { |t| t.name == name }
+        Dir.cd(install_path) do
+          Shards.build(target, "bin")
+        end
+        return Path["bin", name]
+      end
     end
 
     private def each_executable_path(name)

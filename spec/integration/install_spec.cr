@@ -854,6 +854,19 @@ describe "install" do
     File.read(crystal).should eq %(puts "crystal")
   end
 
+  it "builds executables on demand", focus: true do
+    metadata = {
+      dependencies: {executables_autobuild: "0.1.0"},
+    }
+    with_shard(metadata) { run("shards install --no-color") }
+
+    assert_application_path_exists "bin", "autobuild"
+    run(application_path "bin", "autobuild").should eq("autobuilt")
+
+    File.read(application_path "bin", "do-not-override").should eq "OKAY"
+    File.read(application_path "bin", "do-not-override.exe").should eq "OKAY"
+  end
+
   it "errors on missing executable" do
     metadata = {
       dependencies: {"executable_missing": "*"},

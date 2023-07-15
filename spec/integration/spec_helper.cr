@@ -132,6 +132,12 @@ private def setup_repositories
   create_executable "binary", "bin/foo", %(print "FOO")
   create_git_release "binary", "0.2.0", {executables: ["foobar", "baz", "foo"]}
 
+  create_git_repository "executables_autobuild"
+  create_file "executables_autobuild", "src/autobuild.cr", %(print "autobuilt")
+  create_file "executables_autobuild", "bin/do-not-override", %(OKAY)
+  create_file "executables_autobuild", "bin/do-not-override.exe", %(OKAY)
+  create_git_release "executables_autobuild", "0.1.0", {targets: {"autobuild": {main: "src/autobuild.cr"}}, executables: ["autobuild", "do-not-override", "do-not-override.exe"]}
+
   create_git_repository "executable_missing"
   create_git_release "executable_missing", "0.1.0", {executables: ["nonexistent"]}
 
