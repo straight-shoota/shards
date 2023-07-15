@@ -257,9 +257,9 @@ describe "update" do
     File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"
     File.exists?(foo).should be_true    # "Expected to have installed bin/foo executable"
 
-    `#{Process.quote(foobar)}`.should eq("OK")
-    `#{Process.quote(baz)}`.should eq("KO")
-    `#{Process.quote(foo)}`.should eq("FOO")
+    `#{Process.quote(foobar)}`.chomp.should eq("OK")
+    `#{Process.quote(baz)}`.chomp.should eq("KO")
+    `#{Process.quote(foo)}`.chomp.should eq("FOO")
   end
 
   it "skips installing new executables" do

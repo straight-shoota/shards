@@ -1,6 +1,10 @@
 ENV["PATH"] = "#{File.expand_path("../../bin", __DIR__)}#{Process::PATH_DELIMITER}#{ENV["PATH"]}"
 ENV["SHARDS_CACHE_PATH"] = ".shards"
 
+if ENV["CRYSTAL"]? == Process.executable_path
+  exit execute_mock_crystal(ARGV)
+end
+
 require "spec"
 require "../../src/config"
 require "../../src/helpers"
@@ -70,20 +74,13 @@ private def setup_repositories
 
   # dependencies with postinstall scripts:
   create_git_repository "post"
-  {% if flag?(:win32) %}
-    create_executable "post", "make", %(File.touch("made.txt"))
-  {% else %}
-    create_file "post", "Makefile", "all:\n\ttouch made.txt\n"
-  {% end %}
-  create_git_release "post", "0.1.0", {scripts: {postinstall: "make"}}
+  create_git_release "post", "0.1.0", {scripts: {postinstall: "echo building"}}
 
-  create_git_repository "fails"
-  {% if flag?(:win32) %}
-    create_executable "fails", "make", %(exit 1)
-  {% else %}
-    create_file "fails", "Makefile", "all:\n\ttest -n ''\n"
-  {% end %}
-  create_git_release "fails", "0.1.0", {scripts: {postinstall: "make"}}
+  create_git_repository "postinstall_artifact"
+  create_git_release "postinstall_artifact", "0.1.0", {scripts: {postinstall: "echo done > made.txt"}}
+
+  create_git_repository "postinstall_fails"
+  create_git_release "postinstall_fails", "0.1.0", {scripts: {postinstall: "false"}}
 
   # transitive dependencies in postinstall scripts:
   create_git_repository "version"
@@ -125,11 +122,11 @@ private def setup_repositories
 
   # dependencies with executables:
   create_git_repository "binary"
-  create_executable "binary", "bin/foobar", %(print "OK")
-  create_executable "binary", "bin/baz", %(print "KO")
+  create_executable_script "binary", "bin/foobar", %(OK)
+  create_executable_script "binary", "bin/baz", %(KO)
   create_file "binary", "bin/crystal.cr", %(puts "crystal")
   create_git_release "binary", "0.1.0", {executables: ["foobar", "baz", "crystal.cr"]}
-  create_executable "binary", "bin/foo", %(print "FOO")
+  create_executable_script "binary", "bin/foo", %(FOO)
   create_git_release "binary", "0.2.0", {executables: ["foobar", "baz", "foo"]}
 
   create_git_repository "executables_autobuild"

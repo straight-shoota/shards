@@ -668,18 +668,18 @@ describe "install" do
   end
 
   it "runs postinstall script" do
-    with_shard({dependencies: {post: "*"}}) do
+    with_shard({dependencies: {postinstall_artifact: "*"}}) do
       output = run "shards install --no-color"
-      assert_application_path_exists install_path("post", "made.txt")
-      output.should contain("Postinstall of post: make\n")
+      assert_application_path_exists install_path("postinstall_artifact", "made.txt")
+      output.should contain("Postinstall of postinstall_artifact: echo done > made.txt\n")
     end
   end
 
   it "can skip postinstall script" do
-    with_shard({dependencies: {post: "*"}}) do
+    with_shard({dependencies: {postinstall_artifact: "*"}}) do
       output = run "shards install --no-color --skip-postinstall"
-      refute_application_path_exists install_path("post", "made.txt")
-      output.should contain("Postinstall of post: make (skipped)")
+      refute_application_path_exists install_path("postinstall_artifact", "made.txt")
+      output.should contain("Postinstall of postinstall_artifact: echo done > made.txt (skipped)")
     end
   end
 
@@ -688,12 +688,12 @@ describe "install" do
     pending "prints details and removes dependency when postinstall script fails"
   {% else %}
     it "prints details and removes dependency when postinstall script fails" do
-      with_shard({dependencies: {fails: "*"}}) do
-        ex = expect_failure "E: Failed postinstall of fails on make:\n" do
+      with_shard({dependencies: {postinstall_fails: "*"}}) do
+        ex = expect_failure "E: Failed postinstall of postinstall_fails on false:\n" do
           run "shards install --no-color"
         end
-        ex.stdout.should contain("test -n ''\n")
-        Dir.exists?(install_path("fails")).should be_false
+        ex.stdout.should contain("I: Postinstall of postinstall_fails: false\n")
+        Dir.exists?(install_path("postinstall_fails")).should be_false
       end
     end
   {% end %}
@@ -849,12 +849,12 @@ describe "install" do
     refute_application_path_exists foo
     assert_application_path_exists crystal
 
-    `#{Process.quote(foobar)}`.should eq("OK")
-    `#{Process.quote(baz)}`.should eq("KO")
+    `#{Process.quote(foobar)}`.chomp.should eq("OK")
+    `#{Process.quote(baz)}`.chomp.should eq("KO")
     File.read(crystal).should eq %(puts "crystal")
   end
 
-  it "builds executables on demand", focus: true do
+  it "builds executables on demand" do
     metadata = {
       dependencies: {executables_autobuild: "0.1.0"},
     }

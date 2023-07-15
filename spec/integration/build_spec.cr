@@ -27,15 +27,19 @@ describe "build" do
 
   it "builds all targets" do
     Dir.cd(application_path) do
-      run "shards build --no-color"
+      run_with_mock_crystal "shards build --no-color"
 
       File.exists?(bin_path("app")).should be_true
       File.exists?(bin_path("alt")).should be_true
       File.exists?(bin_path("check")).should be_true
 
-      `#{Process.quote(bin_path("app"))}`.chomp.should eq(application_path("src", "cli.cr"))
-      `#{Process.quote(bin_path("alt"))}`.chomp.should eq(application_path("src", "cli.cr"))
-      `#{Process.quote(bin_path("check"))}`.chomp.should eq("1")
+      File.read(bin_path("app")).should eq File.read(application_path("src", "cli.cr"))
+      File.read(bin_path("alt")).should eq File.read(application_path("src", "cli.cr"))
+      File.read(bin_path("check")).should eq File.read(application_path("src", "commands", "check.cr"))
+
+      # `#{Process.quote(bin_path("app"))}`.chomp.should eq(application_path("src", "cli.cr"))
+      # `#{Process.quote(bin_path("alt"))}`.chomp.should eq(application_path("src", "cli.cr"))
+      # `#{Process.quote(bin_path("check"))}`.chomp.should eq("1")
     end
   end
 

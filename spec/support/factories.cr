@@ -257,11 +257,11 @@ def create_shard(project, version, contents : NamedTuple? = nil)
   create_file project, "shard.yml", spec.to_yaml
 end
 
-def create_file(project, filename, contents)
+def create_file(project, filename, contents, perm = File::DEFAULT_CREATE_PERMISSIONS)
   path = File.join(git_path(project), filename)
   parent = File.dirname(path)
   Dir.mkdir_p(parent) unless Dir.exists?(parent)
-  File.write(path, contents)
+  File.write(path, contents, perm: perm)
   path
 end
 
@@ -271,6 +271,14 @@ def create_executable(project, filename, source)
     run "crystal build #{Process.quote(File.basename(path))}"
   end
   File.delete(path)
+end
+
+def create_executable_script(project, filename, output)
+  {% if flag?(:windows) %}
+    filename += ".bat"
+  {% end %}
+  source = %(#! /bin/sh\necho #{output.inspect})
+  create_file(project, filename, source, perm: File::DEFAULT_CREATE_PERMISSIONS | :OwnerExecute)
 end
 
 def git_commits(project, rev = "HEAD")
@@ -383,4 +391,39 @@ def expect_failure(message = nil, *, file = __FILE__, line = __LINE__, &)
     ex.stdout.should contain(message), file: file, line: line
   end
   ex
+end
+
+def run_with_mock_crystal(command, *, env = nil, clear_env = false, input = Process::Redirect::Close)
+  env ||= {} of String => String
+  env["CRYSTAL"] ||= Process.executable_path.not_nil! # mock crystal!
+
+  run(command, env: env, clear_env: clear_env, input: input)
+end
+
+def execute_mock_crystal(args)
+  out_path = ""
+  source = ""
+
+  OptionParser.parse(args) do |opts|
+    opts.on("-o OUT", "") do |o|
+      out_path = o
+    end
+    opts.invalid_option do |option|
+    end
+    opts.unknown_args do |args, options|
+      p args
+      p options
+      command = args.shift
+      raise "Unexpected command: #{command}" unless command == "build"
+
+      source = args.shift
+    end
+  end
+
+  if out_path.presence && source.presence
+    FileUtils.cp(source, out_path)
+    return 0
+  end
+
+  1
 end
