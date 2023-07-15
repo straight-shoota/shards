@@ -112,8 +112,12 @@ module Shards::Specs
       end
     end
   end
+
+  def self.application_path(*path)
+    File.join(application_path, *path)
+  end
 end
 
-def application_path
-  Shards::Specs.application_path
+def application_path(*path)
+  Shards::Specs.application_path(*path)
 end

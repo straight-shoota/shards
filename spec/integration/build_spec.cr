@@ -1,18 +1,18 @@
 require "./spec_helper"
 
 private def bin_path(name)
-  File.join(application_path, "bin", Shards::Helpers.exe(name))
+  application_path("bin", Shards::Helpers.exe(name))
 end
 
 describe "build" do
   before_each do
-    Dir.mkdir(File.join(application_path, "src"))
-    File.write(File.join(application_path, "src", "cli.cr"), "puts __FILE__")
+    Dir.mkdir(application_path("src"))
+    File.write(application_path("src", "cli.cr"), "puts __FILE__")
 
-    Dir.mkdir(File.join(application_path, "src", "commands"))
-    File.write(File.join(application_path, "src", "commands", "check.cr"), "puts __LINE__")
+    Dir.mkdir(application_path("src", "commands"))
+    File.write(application_path("src", "commands", "check.cr"), "puts __LINE__")
 
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -33,8 +33,8 @@ describe "build" do
       File.exists?(bin_path("alt")).should be_true
       File.exists?(bin_path("check")).should be_true
 
-      `#{Process.quote(bin_path("app"))}`.chomp.should eq(File.join(application_path, "src", "cli.cr"))
-      `#{Process.quote(bin_path("alt"))}`.chomp.should eq(File.join(application_path, "src", "cli.cr"))
+      `#{Process.quote(bin_path("app"))}`.chomp.should eq(application_path("src", "cli.cr"))
+      `#{Process.quote(bin_path("alt"))}`.chomp.should eq(application_path("src", "cli.cr"))
       `#{Process.quote(bin_path("check"))}`.chomp.should eq("1")
     end
   end
@@ -60,7 +60,7 @@ describe "build" do
   end
 
   it "reports error when target failed to compile" do
-    File.write File.join(application_path, "src", "cli.cr"), "a = ......"
+    File.write application_path("src", "cli.cr"), "a = ......"
 
     Dir.cd(application_path) do
       ex = expect_raises(FailedCommand) do
@@ -74,7 +74,7 @@ describe "build" do
 
   {% unless flag?(:win32) %}
     it "reports warning without failing" do
-      File.write File.join(application_path, "src", "cli.cr"), <<-CODE
+      File.write application_path("src", "cli.cr"), <<-CODE
       @[Deprecated]
       def a
       end
@@ -90,7 +90,7 @@ describe "build" do
   {% end %}
 
   it "errors when no targets defined" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
     YAML

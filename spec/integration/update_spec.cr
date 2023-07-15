@@ -216,7 +216,7 @@ describe "update" do
     metadata = {dependencies: {} of Symbol => String}
     with_shard(metadata) do
       run "shards update"
-      path = File.join(application_path, "shard.lock")
+      path = application_path("shard.lock")
       File.exists?(path).should be_true
       File.read(path).should eq <<-YAML
         version: 2.0
@@ -249,9 +249,9 @@ describe "update" do
     lock = {binary: "0.1.0"}
     with_shard(metadata, lock) { run("shards update --no-color") }
 
-    foobar = File.join(application_path, "bin", Shards::Helpers.exe("foobar"))
-    baz = File.join(application_path, "bin", Shards::Helpers.exe("baz"))
-    foo = File.join(application_path, "bin", Shards::Helpers.exe("foo"))
+    foobar = application_path("bin", Shards::Helpers.exe("foobar"))
+    baz = application_path("bin", Shards::Helpers.exe("baz"))
+    foo = application_path("bin", Shards::Helpers.exe("foo"))
 
     File.exists?(foobar).should be_true # "Expected to have installed bin/foobar executable"
     File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"
@@ -267,9 +267,9 @@ describe "update" do
     lock = {binary: "0.1.0"}
     with_shard(metadata, lock) { run("shards update --no-color --skip-executables") }
 
-    foobar = File.join(application_path, "bin", Shards::Helpers.exe("foobar"))
-    baz = File.join(application_path, "bin", Shards::Helpers.exe("baz"))
-    foo = File.join(application_path, "bin", Shards::Helpers.exe("foo"))
+    foobar = application_path("bin", Shards::Helpers.exe("foobar"))
+    baz = application_path("bin", Shards::Helpers.exe("baz"))
+    foo = application_path("bin", Shards::Helpers.exe("foo"))
 
     File.exists?(foobar).should be_false
     File.exists?(baz).should be_false

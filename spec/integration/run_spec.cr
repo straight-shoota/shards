@@ -1,21 +1,21 @@
 require "./spec_helper"
 
 private def bin_path(name)
-  File.join(application_path, "bin", Shards::Helpers.exe(name))
+  application_path("bin", Shards::Helpers.exe(name))
 end
 
 describe "run" do
   before_each do
-    Dir.mkdir(File.join(application_path, "src"))
-    File.write(File.join(application_path, "src", "cli.cr"), "puts __FILE__")
+    Dir.mkdir(application_path("src"))
+    File.write(application_path("src", "cli.cr"), "puts __FILE__")
   end
 
   after_each do
-    File.delete File.join(application_path, "shard.yml")
+    File.delete application_path("shard.yml")
   end
 
   it "fails when no targets defined" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       YAML
@@ -29,7 +29,7 @@ describe "run" do
   end
 
   it "fails when passing multiple targets" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -48,7 +48,7 @@ describe "run" do
   end
 
   it "fails when multiple targets, no arg" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -67,7 +67,7 @@ describe "run" do
   end
 
   it "runs when only one target" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -81,12 +81,12 @@ describe "run" do
       File.exists?(bin_path("app")).should be_true
 
       output.should contain("Executing: app")
-      output.chomp.should contain(File.join(application_path, "src", "cli.cr"))
+      output.chomp.should contain(application_path("src", "cli.cr"))
     end
   end
 
   it "runs specified target" do
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -103,17 +103,17 @@ describe "run" do
       File.exists?(bin_path("alt")).should be_false
 
       output.should contain("Executing: app")
-      output.chomp.should contain(File.join(application_path, "src", "cli.cr"))
+      output.chomp.should contain(application_path("src", "cli.cr"))
     end
   end
 
   it "passes back execution failure from child process" do
-    File.write File.join(application_path, "src", "fail.cr"), <<-CR
+    File.write application_path("src", "fail.cr"), <<-CR
       puts "This command fails"
       exit 5
       CR
 
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -130,11 +130,11 @@ describe "run" do
   end
 
   it "forwards additional ARGV to child process" do
-    File.write File.join(application_path, "src", "args.cr"), <<-CR
+    File.write application_path("src", "args.cr"), <<-CR
       print "args: ", ARGV.join(',')
       CR
 
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:
@@ -150,11 +150,11 @@ describe "run" do
   end
 
   it "works well with stdin" do
-    File.write File.join(application_path, "src", "stdin.cr"), <<-CR
+    File.write application_path("src", "stdin.cr"), <<-CR
       print "input: ", STDIN.gets.inspect
       CR
 
-    File.write File.join(application_path, "shard.yml"), <<-YAML
+    File.write application_path("shard.yml"), <<-YAML
       name: build
       version: 0.1.0
       targets:

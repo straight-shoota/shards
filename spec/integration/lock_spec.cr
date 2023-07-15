@@ -12,7 +12,7 @@ describe "lock" do
   it "doesn't generate lockfile when project has no dependencies" do
     with_shard({name: "test"}) do
       run "shards lock"
-      File.exists?(File.join(application_path, "shard.lock")).should be_false
+      File.exists?(application_path("shard.lock")).should be_false
     end
   end
 

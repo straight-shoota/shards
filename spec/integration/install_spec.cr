@@ -571,7 +571,7 @@ describe "install" do
       }
 
       with_shard(metadata) do
-        File.exists?(File.join(application_path, "shard.lock")).should be_false
+        File.exists?(application_path("shard.lock")).should be_false
         run "shards install --without-development"
 
         # it installed dependencies (recursively)
@@ -582,7 +582,7 @@ describe "install" do
         refute_installed "mock"
         refute_installed "minitest"
 
-        File.exists?(File.join(application_path, "shard.lock")).should be_true
+        File.exists?(application_path("shard.lock")).should be_true
       end
     end
   end
@@ -614,7 +614,7 @@ describe "install" do
     with_shard({name: "test"}) do
       run "shards install"
 
-      lockfile = File.join(application_path, "shard.lock")
+      lockfile = application_path("shard.lock")
       File.exists?(lockfile).should be_true
       File.read(lockfile).should eq <<-YAML
         version: 2.0
@@ -833,10 +833,10 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color") }
 
-    foobar = File.join(application_path, "bin", Shards::Helpers.exe("foobar"))
-    baz = File.join(application_path, "bin", Shards::Helpers.exe("baz"))
-    foo = File.join(application_path, "bin", Shards::Helpers.exe("foo"))
-    crystal = File.join(application_path, "bin", "crystal.cr")
+    foobar = application_path("bin", Shards::Helpers.exe("foobar"))
+    baz = application_path("bin", Shards::Helpers.exe("baz"))
+    foo = application_path("bin", Shards::Helpers.exe("foo"))
+    crystal = application_path("bin", "crystal.cr")
 
     File.exists?(foobar).should be_true # "Expected to have installed bin/foobar executable"
     File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"
@@ -877,9 +877,9 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color") }
 
-    foobar = File.join(application_path, "bin", Shards::Helpers.exe("foobar"))
-    baz = File.join(application_path, "bin", Shards::Helpers.exe("baz"))
-    foo = File.join(application_path, "bin", Shards::Helpers.exe("foo"))
+    foobar = application_path("bin", Shards::Helpers.exe("foobar"))
+    baz = application_path("bin", Shards::Helpers.exe("baz"))
+    foo = application_path("bin", Shards::Helpers.exe("foo"))
 
     File.exists?(foobar).should be_true # "Expected to have installed bin/foobar executable"
     File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"

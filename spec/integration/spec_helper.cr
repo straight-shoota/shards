@@ -241,7 +241,7 @@ def assert_installed_file(path, file = __FILE__, line = __LINE__)
 end
 
 def assert_locked(name, version = nil, file = __FILE__, line = __LINE__, *, git = nil, source = nil)
-  path = File.join(application_path, "shard.lock")
+  path = application_path("shard.lock")
   assert File.exists?(path), "expected shard.lock to have been generated", file, line
   Shards::Resolver.clear_resolver_cache # Parsing Shards::Lock might use cache of resolvers. Avoid it
   locks = Shards::Lock.from_file(path)
@@ -269,14 +269,14 @@ private def source_from_resolver(resolver : Shards::Resolver)
 end
 
 def refute_locked(name, version = nil, file = __FILE__, line = __LINE__)
-  path = File.join(application_path, "shard.lock")
+  path = application_path("shard.lock")
   assert File.exists?(path), "expected shard.lock to have been generated", file, line
   locks = Shards::Lock.from_file(path)
   refute locks.shards.find { |d| d.name == name }, "expected #{name} dependency to not have been locked", file, line
 end
 
 def install_path(*path_names)
-  File.join(application_path, Shards::INSTALL_DIR, *path_names)
+  application_path(Shards::INSTALL_DIR, *path_names)
 end
 
 def debug(command)

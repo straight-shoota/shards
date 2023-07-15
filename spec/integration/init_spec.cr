@@ -1,14 +1,14 @@
 require "./spec_helper"
 
 private def shard_path
-  File.join(application_path, Shards::SPEC_FILENAME)
+  application_path(Shards::SPEC_FILENAME)
 end
 
 describe "init" do
   it "creates shard.yml" do
     Dir.cd(application_path) do
       run "shards init"
-      File.exists?(File.join(application_path, Shards::SPEC_FILENAME)).should be_true
+      File.exists?(application_path(Shards::SPEC_FILENAME)).should be_true
       spec = Shards::Spec.from_file(shard_path)
       spec.name.should eq("integration")
       spec.version.should eq(version "0.1.0")

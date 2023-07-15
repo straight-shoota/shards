@@ -16,7 +16,7 @@ describe "version" do
       version: "0.0.42",
     }
     with_shard(metadata) do
-      inner_path = File.join(application_path, "lib/test")
+      inner_path = application_path("lib/test")
       Dir.mkdir_p inner_path
 
       outer_path = File.expand_path("..", application_path)
