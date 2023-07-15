@@ -50,10 +50,9 @@ describe "build" do
 
   it "fails to build unknown target" do
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "target unknown was not found" do
         run "shards build --no-color app unknown check"
       end
-      ex.stdout.should contain("target unknown was not found")
       File.exists?(bin_path("app")).should be_true
       File.exists?(bin_path("check")).should be_false
     end
@@ -63,10 +62,9 @@ describe "build" do
     File.write application_path("src", "cli.cr"), "a = ......"
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      ex = expect_failure "target app failed to compile" do
         run "shards build --no-color app"
       end
-      ex.stdout.should contain("target app failed to compile")
       ex.stdout.should match(/unexpected token: "?.../)
       File.exists?(bin_path("app")).should be_false
     end
@@ -96,10 +94,9 @@ describe "build" do
     YAML
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "Targets not defined in shard.yml" do
         run "shards build --no-color"
       end
-      ex.stdout.should contain("Targets not defined in shard.yml")
       File.exists?(bin_path("")).should be_false
     end
   end

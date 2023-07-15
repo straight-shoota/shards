@@ -24,9 +24,9 @@ describe "check" do
 
   it "fails without lockfile" do
     with_shard({dependencies: {web: "*"}}) do
-      ex = expect_raises(FailedCommand) { run "shards check --no-color" }
-      ex.stdout.should contain("Missing #{Shards::LOCK_FILENAME}")
-      ex.stderr.should be_empty
+      expect_failure "Missing #{Shards::LOCK_FILENAME}" do
+        run "shards check --no-color"
+      end
     end
   end
 
@@ -46,9 +46,9 @@ describe "check" do
       development_dependencies: {mock: "*"},
     }
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards check --no-color" }
-      ex.stdout.should contain("Dependencies aren't satisfied")
-      ex.stderr.should be_empty
+      expect_failure "Dependencies aren't satisfied" do
+        run "shards check --no-color"
+      end
     end
   end
 
@@ -58,9 +58,9 @@ describe "check" do
     end
 
     with_shard({dependencies: {web: "2.0.0"}}) do
-      ex = expect_raises(FailedCommand) { run "shards check --no-color" }
-      ex.stdout.should contain("Dependencies aren't satisfied")
-      ex.stderr.should be_empty
+      expect_failure "Dependencies aren't satisfied" do
+        run "shards check --no-color"
+      end
     end
   end
 
@@ -82,9 +82,9 @@ describe "check" do
     end
 
     with_shard({dependencies: {awesome: {git: git_url(:forked_awesome)}}}) do
-      ex = expect_raises(FailedCommand) { run "shards check --no-color" }
-      ex.stdout.should contain("Dependencies aren't satisfied")
-      ex.stderr.should be_empty
+      expect_failure "Dependencies aren't satisfied" do
+        run "shards check --no-color"
+      end
     end
   end
 
@@ -98,9 +98,9 @@ describe "check" do
     override = {dependencies: {awesome: "0.2.0"}}
 
     with_shard(metadata, nil, override) do
-      ex = expect_raises(FailedCommand) { run "shards check --no-color" }
-      ex.stdout.should contain("Dependencies aren't satisfied")
-      ex.stderr.should be_empty
+      expect_failure "Dependencies aren't satisfied" do
+        run "shards check --no-color"
+      end
     end
   end
 end

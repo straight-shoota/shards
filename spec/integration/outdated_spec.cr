@@ -77,8 +77,9 @@ describe "outdated" do
     end
 
     with_shard({dependencies: {awesome: {git: git_url(:forked_awesome)}}}) do
-      ex = expect_raises(FailedCommand) { run "shards outdated --no-color" }
-      ex.stdout.should contain("Outdated shard.lock (awesome source changed)")
+      expect_failure "Outdated shard.lock (awesome source changed)" do
+        run "shards outdated --no-color"
+      end
     end
   end
 
@@ -88,8 +89,9 @@ describe "outdated" do
     end
 
     with_shard({dependencies: {awesome: "0.2.0"}}) do
-      ex = expect_raises(FailedCommand) { run "shards outdated --no-color" }
-      ex.stdout.should contain("Outdated shard.lock (awesome requirements changed)")
+      expect_failure "Outdated shard.lock (awesome requirements changed)" do
+        run "shards outdated --no-color"
+      end
     end
   end
 
@@ -103,8 +105,9 @@ describe "outdated" do
     override = {dependencies: {awesome: "0.2.0"}}
 
     with_shard(metadata, nil, override) do
-      ex = expect_raises(FailedCommand) { run "shards outdated --no-color" }
-      ex.stdout.should contain("Outdated shard.lock (awesome requirements changed)")
+      expect_failure "Outdated shard.lock (awesome requirements changed)" do
+        run "shards outdated --no-color"
+      end
     end
   end
 

@@ -21,10 +21,9 @@ describe "run" do
       YAML
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "Targets not defined in shard.yml" do
         run "shards run --no-color"
       end
-      ex.stdout.should contain("Targets not defined in shard.yml")
     end
   end
 
@@ -40,10 +39,9 @@ describe "run" do
       YAML
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "Error please specify only one target. If you meant to pass arguments you may use 'shards run target -- args'" do
         run "shards run --no-color app alt"
       end
-      ex.stdout.should contain("Error please specify only one target. If you meant to pass arguments you may use 'shards run target -- args'")
     end
   end
 
@@ -59,10 +57,9 @@ describe "run" do
       YAML
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "Error please specify the target with 'shards run target'" do
         run "shards run --no-color"
       end
-      ex.stdout.should contain("Error please specify the target with 'shards run target'")
     end
   end
 
@@ -122,10 +119,9 @@ describe "run" do
       YAML
 
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "This command fails" do
         run "shards run --no-color"
       end
-      ex.stdout.should contain("This command fails")
     end
   end
 

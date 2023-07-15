@@ -377,3 +377,14 @@ def run(command, *, env = nil, clear_env = false, input = Process::Redirect::Clo
     raise FailedCommand.new("command failed: #{command}", output, error)
   end
 end
+
+def expect_failure(message = nil, *, file = __FILE__, line = __LINE__, &)
+  ex = expect_raises(FailedCommand, file: file, line: line) do
+    yield
+  end
+  ex.stderr.should be_empty, file: file, line: line
+  unless message
+    ex.stdout.should contain(message), file: file, line: line
+  end
+  ex
+end

@@ -283,8 +283,9 @@ describe "update" do
 
     with_shard(metadata) do
       # error: dependency isn't in local cache
-      ex = expect_raises(FailedCommand) { run("shards install --local --no-color") }
-      ex.stdout.should contain(%(E: Missing repository cache for "local_cache".))
+      expect_failure %(E: Missing repository cache for "local_cache".) do
+        run("shards install --local --no-color")
+      end
     end
 
     # re-run without --local to install the dependency:

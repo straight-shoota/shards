@@ -51,8 +51,9 @@ describe "install" do
 
   it "fails when spec is missing" do
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("Missing #{Shards::SPEC_FILENAME}")
+      ex = expect_failure "Missing #{Shards::SPEC_FILENAME}" do
+        run "shards install --no-color"
+      end
       ex.stdout.should contain("Please run 'shards init'")
     end
   end
@@ -408,9 +409,9 @@ describe "install" do
         with_shard(metadata, lock) do
           assert_locked "awesome", "0.1.0", source: {git: git_url(:awesome)}
 
-          ex = expect_raises(FailedCommand) { run "shards install --#{flag} --no-color" }
-          ex.stdout.should contain("Outdated shard.lock (awesome source changed)")
-          ex.stderr.should be_empty
+          expect_failure "Outdated shard.lock (awesome source changed)" do
+            run "shards install --#{flag} --no-color"
+          end
         end
       end
 
@@ -418,9 +419,9 @@ describe "install" do
         metadata = {dependencies: {web: "*"}}
 
         with_shard(metadata) do
-          ex = expect_raises(FailedCommand) { run "shards install --#{flag} --no-color" }
-          ex.stdout.should contain("Missing shard.lock")
-          ex.stderr.should be_empty
+          expect_failure "Missing shard.lock" do
+            run "shards install --#{flag} --no-color"
+          end
         end
       end
 
@@ -431,10 +432,10 @@ describe "install" do
         with_shard(metadata, lock) do
           assert_locked "awesome", "0.1.0.git.commit.1234567890", source: {git: git_url(:awesome)}
 
-          ex = expect_raises(FailedCommand) { run "shards install --#{flag} --no-color" }
-          ex.stdout.should contain("Locked version 0.1.0.git.commit.1234567890 for awesome was not found in git: #{git_url(:awesome)}")
+          ex = expect_failure "Locked version 0.1.0.git.commit.1234567890 for awesome was not found in git: #{git_url(:awesome)}" do
+            run "shards install --#{flag} --no-color"
+          end
           ex.stdout.should contain("Please run `shards update`")
-          ex.stderr.should be_empty
         end
       end
 
@@ -448,10 +449,10 @@ describe "install" do
         with_shard(metadata, lock) do
           assert_locked "awesome", "0.3.0", source: {git: git_url(:awesome)}
 
-          ex = expect_raises(FailedCommand) { run "shards install --#{flag} --no-color" }
-          ex.stdout.should contain("Locked version 0.3.0 for awesome was not found in git: #{git_url(:forked_awesome)} (locked source is git: #{git_url(:awesome)})")
+          ex = expect_failure "Locked version 0.3.0 for awesome was not found in git: #{git_url(:forked_awesome)} (locked source is git: #{git_url(:awesome)})" do
+            run "shards install --#{flag} --no-color"
+          end
           ex.stdout.should contain("Please run `shards update`")
-          ex.stderr.should be_empty
         end
       end
 
@@ -460,9 +461,9 @@ describe "install" do
         lock = {web: "1.0.0"}
 
         with_shard(metadata, lock) do
-          ex = expect_raises(FailedCommand) { run "shards install --no-color --#{flag}" }
-          ex.stdout.should contain("Outdated shard.lock")
-          ex.stderr.should be_empty
+          expect_failure "Outdated shard.lock" do
+            run "shards install --no-color --#{flag}"
+          end
           refute_installed "web"
         end
       end
@@ -472,8 +473,9 @@ describe "install" do
         lock = {inprogress: "0.1.0+git.commit.#{git_commits(:inprogress).first}"}
 
         with_shard(metadata, lock) do
-          ex = expect_raises(FailedCommand) { run "shards install --no-color --#{flag}" }
-          ex.stdout.should contain("Outdated shard.lock")
+          expect_failure "Outdated shard.lock" do
+            run "shards install --no-color --#{flag}"
+          end
           refute_installed "inprogress"
         end
       end
@@ -488,9 +490,9 @@ describe "install" do
         lock = {web: "1.0.0"}
 
         with_shard(metadata, lock) do
-          ex = expect_raises(FailedCommand) { run "shards install --#{flag} --no-color" }
-          ex.stdout.should contain("Outdated shard.lock")
-          ex.stderr.should be_empty
+          expect_failure "Outdated shard.lock" do
+            run "shards install --#{flag} --no-color"
+          end
         end
       end
 
@@ -536,9 +538,9 @@ describe "install" do
         expected_commit = git_commits(:forked_awesome).first
 
         with_shard(metadata, lock, override) do
-          ex = expect_raises(FailedCommand) { run "shards install --no-color --#{flag}" }
-          ex.stdout.should contain("Outdated shard.lock")
-          ex.stderr.should be_empty
+          expect_failure "Outdated shard.lock" do
+            run "shards install --no-color --#{flag}"
+          end
           refute_installed "awesome"
         end
       end
@@ -554,9 +556,9 @@ describe "install" do
         expected_commit = git_commits(:forked_awesome).first
 
         with_shard(metadata, lock, override) do
-          ex = expect_raises(FailedCommand) { run "shards install --no-color --#{flag}" }
-          ex.stdout.should contain("Outdated shard.lock")
-          ex.stderr.should be_empty
+          expect_failure "Outdated shard.lock" do
+            run "shards install --no-color --#{flag}"
+          end
           refute_installed "awesome"
         end
       end
@@ -687,8 +689,9 @@ describe "install" do
   {% else %}
     it "prints details and removes dependency when postinstall script fails" do
       with_shard({dependencies: {fails: "*"}}) do
-        ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-        ex.stdout.should contain("E: Failed postinstall of fails on make:\n")
+        ex = expect_failure "E: Failed postinstall of fails on make:\n" do
+          run "shards install --no-color"
+        end
         ex.stdout.should contain("test -n ''\n")
         Dir.exists?(install_path("fails")).should be_false
       end
@@ -723,8 +726,9 @@ describe "install" do
     create_git_release "b", "0.1.0", {dependencies: {a: {git: git_path("a")}}}
 
     with_shard({dependencies: {a: "*"}}) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("There is a circular dependency between a and b")
+      expect_failure "There is a circular dependency between a and b" do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -735,8 +739,9 @@ describe "install" do
       },
     }
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("Error shard name (mock) doesn't match dependency name (typo)")
+      expect_failure "Error shard name (mock) doesn't match dependency name (typo)" do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -797,8 +802,9 @@ describe "install" do
       },
     }
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("Error shard name (old_name) doesn't match dependency name (new_name)")
+      expect_failure "Error shard name (old_name) doesn't match dependency name (new_name)" do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -809,8 +815,9 @@ describe "install" do
       },
     }
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("Error shard name (new_name) doesn't match dependency name (old_name)")
+      expect_failure "Error shard name (new_name) doesn't match dependency name (old_name)" do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -852,8 +859,7 @@ describe "install" do
       dependencies: {"executable_missing": "*"},
     }
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain <<-ERROR
+      expect_failure <<-ERROR { run "shards install --no-color" }
         E: Could not find executable "nonexistent"
         ERROR
     end
@@ -890,8 +896,7 @@ describe "install" do
     }
 
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain <<-ERROR
+      expect_failure <<-ERROR { run "shards install --no-color" }
         E: Unable to satisfy the following requirements:
 
         - `d (>= 0.2.0)` required by `shard.yml`
@@ -921,8 +926,9 @@ describe "install" do
     it "path" do
       metadata = {dependencies: {reallynoshardyml: {path: rel_path("reallynoshardyml")}}}
       with_shard(metadata) do
-        ex = expect_raises(FailedCommand) { run "shards install --no-color -v" }
-        ex.stdout.should contain(%(E: Missing "shard.yml" for "reallynoshardyml" at #{File.expand_path(rel_path("reallynoshardyml")).inspect}))
+        expect_failure %(E: Missing "shard.yml" for "reallynoshardyml" at #{File.expand_path(rel_path("reallynoshardyml")).inspect}) do
+          run "shards install --no-color -v"
+        end
       end
     end
   end
@@ -930,8 +936,9 @@ describe "install" do
   it "expands path and shows in debug info if missing" do
     metadata = {dependencies: {nonexistent: {path: "~/nonexistent-path"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color -v" }
-      ex.stdout.should contain(%(E: Failed no such path: #{Path.home.join("nonexistent-path")}))
+      expect_failure %(E: Failed no such path: #{Path.home.join("nonexistent-path")}) do
+        run "shards install --no-color -v"
+      end
     end
   end
 
@@ -947,40 +954,45 @@ describe "install" do
   it "shows error when branch does not exist" do
     metadata = {dependencies: {web: {git: git_url(:web), branch: "foo"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain(%(E: Could not find branch foo for shard "web" in the repository #{git_url(:web)}))
+      expect_failure %(E: Could not find branch foo for shard "web" in the repository #{git_url(:web)}) do
+        run "shards install --no-color"
+      end
     end
   end
 
   it "shows error when tag does not exist" do
     metadata = {dependencies: {web: {git: git_url(:web), tag: "foo"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain(%(E: Could not find tag foo for shard "web" in the repository #{git_url(:web)}))
+      expect_failure %(E: Could not find tag foo for shard "web" in the repository #{git_url(:web)}) do
+        run "shards install --no-color"
+      end
     end
   end
 
   it "shows error when commit does not exist" do
     metadata = {dependencies: {web: {git: git_url(:web), commit: "f8f67cc67d6bd3479811825a49a16260a8c767a3"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain(%(E: Could not find commit f8f67cc67d6bd3479811825a49a16260a8c767a3 for shard "web" in the repository #{git_url(:web)}))
+      expect_failure %(E: Could not find commit f8f67cc67d6bd3479811825a49a16260a8c767a3 for shard "web" in the repository #{git_url(:web)}) do
+        run "shards install --no-color"
+      end
     end
   end
 
   it "shows error when installing by ref and shard.yml doesn't exist" do
     metadata = {dependencies: {noshardyml: {git: git_url(:noshardyml), tag: "v0.1.0"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain(%(E: No shard.yml was found for shard "noshardyml" at commit #{git_commits(:noshardyml)[1]}))
+      expect_failure %(E: No shard.yml was found for shard "noshardyml" at commit #{git_commits(:noshardyml)[1]}) do
+        run "shards install --no-color"
+      end
     end
   end
 
   it "shows error when installing by ref and spec is invalid" do
     metadata = {dependencies: {invalidspec: {git: git_url(:invalidspec), tag: "v0.1.0"}}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain(%(E: Invalid shard.yml for shard "invalidspec" at commit #{git_commits(:invalidspec)[0]}: Expected SCALAR but was SEQUENCE_START at line 5, column 1))
+      expect_failure %(E: Invalid shard.yml for shard "invalidspec" at commit #{git_commits(:invalidspec)[0]}: Expected SCALAR but was SEQUENCE_START at line 5, column 1) do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -1016,8 +1028,9 @@ describe "install" do
       awesome:      {git: git_url(:forked_awesome)},
     }}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color" }
-      ex.stdout.should contain("Error shard name (awesome) has ambiguous sources")
+      expect_failure "Error shard name (awesome) has ambiguous sources" do
+        run "shards install --no-color"
+      end
     end
   end
 
@@ -1235,10 +1248,9 @@ describe "install" do
       awesome: {path: git_path(:forked_awesome)},
     }}
     with_shard(metadata, nil, ignored_override) do
-      ex = expect_raises(FailedCommand) do
+      expect_failure "Missing shard.missing.yml" do
         run "shards install --no-color", env: {"SHARDS_OVERRIDE" => "shard.missing.yml"}
       end
-      ex.stdout.should contain("Missing shard.missing.yml")
     end
   end
 
@@ -1274,8 +1286,9 @@ describe "install" do
   it "fails when git is missing" do
     metadata = {dependencies: {web: "*"}}
     with_shard(metadata) do
-      ex = expect_raises(FailedCommand) { run "shards install --no-color", env: {"PATH" => File.expand_path("../../bin", __DIR__), "SHARDS_CACHE_PATH" => ""} }
-      ex.stdout.should contain "Error missing git command line tool. Please install Git first!"
+      expect_failure "Error missing git command line tool. Please install Git first!" do
+        run "shards install --no-color", env: {"PATH" => File.expand_path("../../bin", __DIR__), "SHARDS_CACHE_PATH" => ""}
+      end
     end
   end
 end

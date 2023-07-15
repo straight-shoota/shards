@@ -18,8 +18,9 @@ describe "init" do
   it "won't overwrite shard.yml" do
     Dir.cd(application_path) do
       File.write(shard_path, "")
-      ex = expect_raises(FailedCommand) { run "shards init --no-color" }
-      ex.stdout.should contain("#{Shards::SPEC_FILENAME} already exists")
+      expect_failure "#{Shards::SPEC_FILENAME} already exists" do
+        run "shards init --no-color"
+      end
       File.read(shard_path).should be_empty
     end
   end

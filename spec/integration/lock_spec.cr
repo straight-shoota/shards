@@ -3,8 +3,9 @@ require "./spec_helper"
 describe "lock" do
   it "fails when spec is missing" do
     Dir.cd(application_path) do
-      ex = expect_raises(FailedCommand) { run "shards lock --no-color" }
-      ex.stdout.should contain("Missing #{Shards::SPEC_FILENAME}")
+      ex = expect_failure "Missing #{Shards::SPEC_FILENAME}" do
+        run "shards lock --no-color"
+      end
       ex.stdout.should contain("Please run 'shards init'")
     end
   end
