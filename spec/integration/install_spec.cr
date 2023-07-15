@@ -64,7 +64,7 @@ describe "install" do
       File.delete "#{Shards::INSTALL_DIR}/.shards.info"
       File.touch "#{Shards::INSTALL_DIR}/web/foo.txt"
       run "shards install"
-      File.exists?("#{Shards::INSTALL_DIR}/web/foo.txt").should be_false
+      refute_application_path_exists Shards::INSTALL_DIR, "web", "foo.txt"
       assert_installed "web", "2.1.0"
     end
   end
@@ -85,7 +85,7 @@ describe "install" do
       Dir.mkdir_p(Shards::INSTALL_DIR)
       File.touch("#{Shards::INSTALL_DIR}/web.sha1")
       run "shards install"
-      File.exists?("#{Shards::INSTALL_DIR}/web.sha1").should be_false
+      refute_application_path_exists Shards::INSTALL_DIR, "web.sha1"
     end
   end
 
@@ -571,7 +571,7 @@ describe "install" do
       }
 
       with_shard(metadata) do
-        File.exists?(application_path("shard.lock")).should be_false
+        refute_application_path_exists "shard.lock"
         run "shards install --without-development"
 
         # it installed dependencies (recursively)
@@ -582,7 +582,7 @@ describe "install" do
         refute_installed "mock"
         refute_installed "minitest"
 
-        File.exists?(application_path("shard.lock")).should be_true
+        assert_application_path_exists "shard.lock"
       end
     end
   end
@@ -615,7 +615,6 @@ describe "install" do
       run "shards install"
 
       lockfile = application_path("shard.lock")
-      File.exists?(lockfile).should be_true
       File.read(lockfile).should eq <<-YAML
         version: 2.0
         shards: {}
@@ -660,16 +659,16 @@ describe "install" do
 
   it "creates ./lib/ when there are no dependencies" do
     with_shard({name: "empty"}) do
-      File.exists?("./lib/").should be_false
+      refute_application_path_exists "lib"
       run "shards install"
-      File.directory?("./lib/").should be_true
+      File.directory?("lib").should be_true
     end
   end
 
   it "runs postinstall script" do
     with_shard({dependencies: {post: "*"}}) do
       output = run "shards install --no-color"
-      File.exists?(install_path("post", "made.txt")).should be_true
+      assert_application_path_exists install_path("post", "made.txt")
       output.should contain("Postinstall of post: make\n")
     end
   end
@@ -677,7 +676,7 @@ describe "install" do
   it "can skip postinstall script" do
     with_shard({dependencies: {post: "*"}}) do
       output = run "shards install --no-color --skip-postinstall"
-      File.exists?(install_path("post", "made.txt")).should be_false
+      refute_application_path_exists install_path("post", "made.txt")
       output.should contain("Postinstall of post: make (skipped)")
     end
   end
@@ -700,7 +699,7 @@ describe "install" do
     with_shard({dependencies: {transitive: "*"}}) do
       run "shards install"
       binary = install_path("transitive", Shards::Helpers.exe("version"))
-      File.exists?(binary).should be_true
+      assert_application_path_exists binary
       `#{Process.quote(binary)}`.chomp.should eq("version @ 0.1.0")
     end
   end
@@ -838,10 +837,10 @@ describe "install" do
     foo = application_path("bin", Shards::Helpers.exe("foo"))
     crystal = application_path("bin", "crystal.cr")
 
-    File.exists?(foobar).should be_true # "Expected to have installed bin/foobar executable"
-    File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"
-    File.exists?(foo).should be_false   # "Expected not to have installed bin/foo executable"
-    File.exists?(crystal).should be_true
+    assert_application_path_exists foobar
+    assert_application_path_exists baz
+    assert_application_path_exists foo
+    assert_application_path_exists crystal
 
     `#{Process.quote(foobar)}`.should eq("OK")
     `#{Process.quote(baz)}`.should eq("KO")
@@ -866,7 +865,7 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color --skip-executables") }
 
-    File.exists?(Path[application_path, "bin"]).should be_false
+    refute_application_path_exists, "bin"
   end
 
   it "installs executables at refs" do
@@ -877,13 +876,9 @@ describe "install" do
     }
     with_shard(metadata) { run("shards install --no-color") }
 
-    foobar = application_path("bin", Shards::Helpers.exe("foobar"))
-    baz = application_path("bin", Shards::Helpers.exe("baz"))
-    foo = application_path("bin", Shards::Helpers.exe("foo"))
-
-    File.exists?(foobar).should be_true # "Expected to have installed bin/foobar executable"
-    File.exists?(baz).should be_true    # "Expected to have installed bin/baz executable"
-    File.exists?(foo).should be_false   # "Expected not to have installed bin/foo executable"
+    assert_application_path_exists "bin", Shards::Helpers.exe("foobar")
+    assert_application_path_exists "bin", Shards::Helpers.exe("baz")
+    assert_application_path_exists "bin", Shards::Helpers.exe("foo")
   end
 
   it "shows conflict message" do
