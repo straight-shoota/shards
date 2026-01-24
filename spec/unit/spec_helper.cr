@@ -1,5 +1,5 @@
 Shards.cache_path = ".shards"
-ENV["SHARDS_INSTALL_PATH"] = File.expand_path(".lib", __DIR__)
+Shards.install_path = File.expand_path(".lib", __DIR__)
 
 require "spec"
 require "../../src/config"
