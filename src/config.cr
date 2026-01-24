@@ -15,8 +15,8 @@ module Shards
   VERSION_AT_HG_COMMIT     = /^(\d+[-.][-.a-zA-Z\d]+)\+hg\.commit\.([0-9a-f]+)$/
   VERSION_AT_FOSSIL_COMMIT = /^(\d+[-.][-.a-zA-Z\d]+)\+fossil\.commit\.([0-9a-f]+)$/
 
-  def self.cache_path
-    @@cache_path ||= find_or_create_cache_path
+  class_property cache_path do
+    find_or_create_cache_path
   end
 
   private def self.find_or_create_cache_path

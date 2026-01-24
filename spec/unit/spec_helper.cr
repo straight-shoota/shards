@@ -1,4 +1,4 @@
-ENV["SHARDS_CACHE_PATH"] = ".shards"
+Shards.cache_path = ".shards"
 ENV["SHARDS_INSTALL_PATH"] = File.expand_path(".lib", __DIR__)
 
 require "spec"

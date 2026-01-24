@@ -355,6 +355,7 @@ end
 def run(command, *, env = nil, clear_env = false, input = Process::Redirect::Close)
   cmd_env = {
     "CRYSTAL_PATH" => Shards::Specs.crystal_path,
+    "SHARDS_CACHE_PATH" => Shards.cache_path,
   }
   if clear_env
     cmd_env["CRYSTAL_OPTS"] = ""
