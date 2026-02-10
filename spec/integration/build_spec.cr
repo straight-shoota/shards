@@ -81,8 +81,8 @@ describe "build" do
     CODE
 
     Dir.cd(application_path) do
-      err = capture %w[shards build --no-color app], clear_env: true
-      err.should match(/eprecated/)
+      result = capture_result %w[shards build --no-color app], clear_env: true
+      result.error.should match(/eprecated/)
       File.exists?(bin_path("app")).should be_true
     end
   end

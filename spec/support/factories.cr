@@ -352,7 +352,12 @@ def tmp_path
   Shards::Specs.tmp_path
 end
 
-def capture(command_line : Enumerable(String), *, env = nil, clear_env = false, input = Process::Redirect::Close)
+record RunResult,
+  status : Process::Status,
+  output : String,
+  error : String
+
+def capture_result(command_line : Enumerable(String), *, env = nil, clear_env = false, input = Process::Redirect::Close)
   output = Process::Redirect::Pipe
   error = Process::Redirect::Pipe
 
@@ -366,9 +371,14 @@ def capture(command_line : Enumerable(String), *, env = nil, clear_env = false, 
   end
   status = $?
 
-  if status.success?
-    stdout
+  RunResult.new(status, stdout, stderr)
+end
+
+def capture(command_line : Enumerable(String), *, env = nil, clear_env = false, input = Process::Redirect::Close)
+  result = capture_result(command_line, env: env, clear_env: clear_env, input: input)
+  if result.status.success?
+    result.output
   else
-    raise FailedCommand.new("command failed: #{command_line.join(" ").inspect}", stdout, stderr)
+    raise FailedCommand.new("command failed: #{command_line.join(" ").inspect}", result.output, result.error)
   end
 end
