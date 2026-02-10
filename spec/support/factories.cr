@@ -363,6 +363,12 @@ def capture_result(command_line : Enumerable(String), *, env = nil, clear_env = 
 
   command, *args = command_line
 
+  # Make sure we use local build for `shards` command in integration specs
+  case command
+  when "shards"
+    command = File.expand_path("../../bin/shards", __DIR__)
+  end
+
   stdout, stderr = Process.run(command, args, env: env, input: input, output: output, error: error) do |process|
     {
       process.output.gets_to_end.gsub("\r\n", "\n"),
